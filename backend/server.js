@@ -1,0 +1,17 @@
+const express = require('express');
+const cors = require('cors');
+
+const toursRoutes = require('./routes/tours');
+const authRoutes = require('./routes/auth');
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/tours', toursRoutes);
+app.use('/auth', authRoutes);
+
+app.listen(5000, () => {
+  console.log('Server running on http://localhost:5000');
+});
