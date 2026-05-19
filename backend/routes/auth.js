@@ -8,23 +8,26 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tour_agency_secret_2024';
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
+
     if (!name || !email || !password)
-      return res.status(400).json({ message: 'Заполните все поля' });
+      return res.status(400).json({ message: 'Заполните все поля: имя, email и пароль' });
+    if (name.trim().length < 2)
+      return res.status(400).json({ message: 'Имя должно содержать не менее 2 символов' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return res.status(400).json({ message: 'Введите корректный адрес email' });
     if (password.length < 6)
-      return res.status(400).json({ message: 'Пароль должен быть не менее 6 символов' });
+      return res.status(400).json({ message: 'Пароль должен содержать не менее 6 символов' });
 
-    const existing = await pool.query('SELECT id FROM users WHERE email=$1', [email]);
+    const existing = await pool.query('SELECT id FROM users WHERE email=$1', [email.toLowerCase().trim()]);
     if (existing.rows.length > 0)
-      return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
+      return res.status(400).json({ message: 'Пользователь с таким email уже зарегистрирован' });
 
-    const allowedRoles = ['user', 'agent', 'admin'];
-    const userRole = allowedRoles.includes(role) ? role : 'user';
     const hashPassword = bcrypt.hashSync(password, 10);
 
     const result = await pool.query(
       'INSERT INTO users (name, email, password, role) VALUES ($1,$2,$3,$4) RETURNING id, name, email, role, avatar, created_at',
-      [name, email, hashPassword, userRole]
+      [name.trim(), email.toLowerCase().trim(), hashPassword, 'user']
     );
 
     const user = result.rows[0];
@@ -33,7 +36,7 @@ router.post('/register', async (req, res) => {
     res.json({ token, user });
   } catch (err) {
     console.error('Register error:', err);
-    res.status(500).json({ message: 'Ошибка сервера при регистрации' });
+    res.status(500).json({ message: 'Ошибка сервера при регистрации. Попробуйте ещё раз.' });
   }
 });
 
@@ -43,11 +46,11 @@ router.post('/login', async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: 'Введите email и пароль' });
 
-    const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email=$1', [email.toLowerCase().trim()]);
     const user = result.rows[0];
 
     if (!user)
-      return res.status(400).json({ message: 'Пользователь не найден' });
+      return res.status(400).json({ message: 'Пользователь с таким email не найден' });
 
     const valid = bcrypt.compareSync(password, user.password);
     if (!valid)
@@ -61,7 +64,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ message: 'Ошибка сервера при входе' });
+    res.status(500).json({ message: 'Ошибка сервера при входе. Попробуйте ещё раз.' });
   }
 });
 
@@ -87,7 +90,7 @@ router.put('/me', require('../middleware/auth'), async (req, res) => {
     const user = userResult.rows[0];
     if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
 
-    let updatedName = name || user.name;
+    let updatedName = name ? name.trim() : user.name;
     let updatedAvatar = avatar !== undefined ? avatar : user.avatar;
     let updatedPassword = user.password;
 
@@ -95,7 +98,7 @@ router.put('/me', require('../middleware/auth'), async (req, res) => {
       if (!currentPassword) return res.status(400).json({ message: 'Введите текущий пароль' });
       const valid = bcrypt.compareSync(currentPassword, user.password);
       if (!valid) return res.status(400).json({ message: 'Неверный текущий пароль' });
-      if (newPassword.length < 6) return res.status(400).json({ message: 'Новый пароль должен быть не менее 6 символов' });
+      if (newPassword.length < 6) return res.status(400).json({ message: 'Новый пароль должен содержать не менее 6 символов' });
       updatedPassword = bcrypt.hashSync(newPassword, 10);
     }
 

@@ -2,17 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toursAPI, browsingAPI } from '../api';
 
-const categories = ['Все', 'Пляжный', 'Культурный', 'Приключения'];
+const CATEGORIES = ['Все', 'Пляжный', 'Культурный', 'Приключения'];
+
+const StarRating = ({ value }) => {
+  const full = Math.round(value || 4);
+  return (
+    <span style={{ color: '#C4384F', fontSize: 13, letterSpacing: 1 }}>
+      {'★'.repeat(full)}{'☆'.repeat(5 - full)}
+      <span style={{ color: '#5A6A7E', fontWeight: 600, marginLeft: 5, fontSize: 12 }}>{Number(value).toFixed(1)}</span>
+    </span>
+  );
+};
 
 const ToursPage = () => {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [category, setCategory] = useState('Все');
   const [maxPrice, setMaxPrice] = useState('');
-  const [searchInput, setSearchInput] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => { fetchTours(); }, [search, category, maxPrice]);
 
   const fetchTours = async () => {
     setLoading(true); setError('');
@@ -24,178 +36,192 @@ const ToursPage = () => {
       const res = await toursAPI.getAll(params);
       setTours(res.data);
     } catch {
-      setError('Не удалось загрузить туры. Проверьте соединение.');
+      setError('Не удалось загрузить туры. Проверьте соединение с сервером.');
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchTours(); }, [search, category, maxPrice]);
-
   const handleSearch = (e) => { e.preventDefault(); setSearch(searchInput); };
+  const resetSearch = () => { setSearch(''); setSearchInput(''); };
 
   const openTour = async (tour) => {
     try { await browsingAPI.add(tour.id); } catch {}
     navigate(`/tours/${tour.id}`);
   };
 
-  const stars = (r) => '⭐'.repeat(Math.round(r || 4));
-
   const s = {
     hero: {
-      background: 'linear-gradient(135deg, #0a3d62 0%, #1e6091 50%, #0097b2 100%)',
-      padding: '60px 20px 100px', textAlign: 'center', position: 'relative', overflow: 'hidden',
+      background: 'linear-gradient(135deg, #5C0F1A 0%, #7D1128 40%, #3A6A8A 100%)',
+      padding: '56px 20px 96px', textAlign: 'center', position: 'relative', overflow: 'hidden',
+    },
+    heroEyebrow: {
+      color: 'rgba(255,255,255,0.65)', fontSize: 11, letterSpacing: 3,
+      textTransform: 'uppercase', marginBottom: 12, fontWeight: 600,
     },
     heroTitle: {
-      fontFamily: "'Playfair Display', serif", fontSize: 42, color: 'white',
-      fontWeight: 700, marginBottom: 12, textShadow: '0 2px 20px rgba(0,0,0,0.2)',
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 44, color: 'white', fontWeight: 700, marginBottom: 10,
+      textShadow: '0 2px 20px rgba(0,0,0,0.2)',
     },
-    heroSub: { color: 'rgba(255,255,255,0.85)', fontSize: 16, marginBottom: 32 },
-    searchBox: {
-      background: 'white', borderRadius: 60, padding: '6px 6px 6px 20px',
-      display: 'flex', gap: 8, maxWidth: 600, margin: '0 auto',
-      boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
+    heroSub: { color: 'rgba(255,255,255,0.78)', fontSize: 15, marginBottom: 32 },
+    searchWrap: {
+      background: 'white', borderRadius: 60, padding: '6px 6px 6px 22px',
+      display: 'flex', gap: 8, maxWidth: 580, margin: '0 auto',
+      boxShadow: '0 12px 40px rgba(0,0,0,0.22)',
     },
     searchInput: {
       flex: 1, border: 'none', outline: 'none', fontFamily: 'Montserrat, sans-serif',
-      fontSize: 15, color: '#0a3d62', background: 'transparent',
+      fontSize: 14.5, color: '#1E2A38', background: 'transparent',
     },
     searchBtn: {
-      background: 'linear-gradient(135deg, #f5a623, #ffd166)',
-      color: 'white', border: 'none', borderRadius: 50, padding: '12px 24px',
-      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer',
+      background: 'linear-gradient(135deg, #7D1128, #C4384F)',
+      color: 'white', border: 'none', borderRadius: 50, padding: '11px 24px',
+      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13.5, cursor: 'pointer',
+      transition: 'all 0.25s',
     },
     wave: {
-      position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
-      background: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80'%3E%3Cpath fill='%23e8f4fd' d='M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z'/%3E%3C/svg%3E\")",
+      position: 'absolute', bottom: 0, left: 0, right: 0, height: 70,
+      background: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70'%3E%3Cpath fill='%23F3F7FA' d='M0,35 C360,70 720,0 1080,35 C1260,52 1380,28 1440,35 L1440,70 L0,70 Z'/%3E%3C/svg%3E\")",
       backgroundSize: 'cover',
     },
-    filters: {
-      background: 'white', borderRadius: 16, padding: '16px 24px',
-      boxShadow: '0 4px 16px rgba(10,61,98,0.1)', marginBottom: 24,
-      display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
+    filterBar: {
+      background: 'white', borderRadius: 14, padding: '14px 22px',
+      boxShadow: '0 2px 12px rgba(30,42,56,0.08)', marginBottom: 24,
+      display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center',
     },
-    filterLabel: { fontWeight: 700, color: '#0a3d62', fontSize: 14 },
+    filterLabel: { fontWeight: 700, color: '#4E8098', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
     catBtn: {
-      padding: '8px 18px', border: '2px solid #e2e8f0', borderRadius: 50,
+      padding: '7px 17px', border: '1.5px solid #E8EDF3', borderRadius: 50,
       cursor: 'pointer', fontFamily: 'Montserrat, sans-serif', fontWeight: 600,
-      fontSize: 13, background: 'white', color: '#64748b', transition: 'all 0.2s',
+      fontSize: 13, background: 'white', color: '#5A6A7E', transition: 'all 0.2s',
     },
-    catBtnActive: { background: '#0097b2', color: 'white', borderColor: '#0097b2' },
-    card: {
-      background: 'white', borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
-      boxShadow: '0 8px 24px rgba(10,61,98,0.1)', transition: 'all 0.3s',
-      display: 'flex', flexDirection: 'column',
-    },
-    img: { width: '100%', height: 200, objectFit: 'cover', display: 'block' },
-    imgPlaceholder: {
-      width: '100%', height: 200,
-      background: 'linear-gradient(135deg, #0a3d62, #0097b2)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 48,
-    },
-    cardBody: { padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' },
-    category: {
-      display: 'inline-block', background: '#e8f4fd', color: '#0097b2',
-      fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 50,
-      marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5,
-    },
-    cardTitle: { fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: '#0a3d62', marginBottom: 6 },
-    location: { color: '#64748b', fontSize: 13, marginBottom: 8 },
-    rating: { fontSize: 13, marginBottom: 12, color: '#64748b' },
-    footer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 12, borderTop: '1px solid #f1f5f9' },
-    price: { fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: '#0a3d62' },
-    priceLabel: { fontSize: 11, color: '#64748b', display: 'block' },
-    bookBtn: {
-      background: 'linear-gradient(135deg, #f5a623, #ffd166)',
-      color: 'white', border: 'none', borderRadius: 50, padding: '10px 20px',
-      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer',
-      boxShadow: '0 4px 12px rgba(245,166,35,0.4)', transition: 'all 0.3s',
+    catBtnActive: {
+      background: 'linear-gradient(135deg, #7D1128, #C4384F)',
+      color: 'white', borderColor: 'transparent',
     },
     priceInput: {
-      padding: '8px 14px', border: '2px solid #e2e8f0', borderRadius: 50,
+      padding: '8px 14px', border: '1.5px solid #E8EDF3', borderRadius: 50,
       fontFamily: 'Montserrat, sans-serif', fontSize: 13, outline: 'none',
-      width: 140, color: '#0a3d62',
+      width: 155, color: '#1E2A38', transition: 'border-color 0.2s',
     },
-    count: { color: '#64748b', fontSize: 14, fontWeight: 500 },
+    card: {
+      background: 'white', borderRadius: 18, overflow: 'hidden',
+      boxShadow: '0 4px 18px rgba(30,42,56,0.09)',
+      transition: 'transform 0.25s, box-shadow 0.25s',
+      display: 'flex', flexDirection: 'column', cursor: 'pointer',
+    },
+    img: { width: '100%', height: 195, objectFit: 'cover', display: 'block' },
+    imgPlaceholder: {
+      width: '100%', height: 195,
+      background: 'linear-gradient(135deg, #7D1128, #4E8098)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: 'white', fontSize: 13, fontWeight: 600, letterSpacing: 1,
+    },
+    cardBody: { padding: '18px 20px', flex: 1, display: 'flex', flexDirection: 'column' },
+    catTag: {
+      display: 'inline-block', background: '#EEF6FB', color: '#4E8098',
+      fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 50,
+      marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.6,
+    },
+    cardTitle: {
+      fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+      color: '#1E2A38', marginBottom: 5, lineHeight: 1.3,
+    },
+    location: { color: '#5A6A7E', fontSize: 12.5, marginBottom: 7 },
+    cardFooter: {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      marginTop: 'auto', paddingTop: 12, borderTop: '1px solid #F4F6F9',
+    },
+    price: {
+      fontFamily: "'Playfair Display', serif", fontSize: 21, fontWeight: 700, color: '#7D1128',
+    },
+    priceFrom: { fontSize: 10, color: '#5A6A7E', display: 'block', fontWeight: 500 },
+    detailBtn: {
+      background: 'linear-gradient(135deg, #7D1128, #C4384F)',
+      color: 'white', border: 'none', borderRadius: 50, padding: '9px 18px',
+      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12.5, cursor: 'pointer',
+      transition: 'all 0.25s', boxShadow: '0 3px 10px rgba(125,17,40,0.3)',
+    },
+    countLine: { color: '#5A6A7E', fontSize: 13, fontWeight: 500 },
+    emptyWrap: { textAlign: 'center', padding: '70px 20px', color: '#5A6A7E' },
+    emptyTitle: { fontSize: 19, fontWeight: 700, color: '#1E2A38', marginBottom: 8 },
+    divider: { width: 1, height: 22, background: '#E8EDF3' },
   };
 
   return (
     <div>
       <div style={s.hero}>
-        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', marginBottom: 8, letterSpacing: 3, textTransform: 'uppercase' }}>
-          🌊 Откройте мир
-        </div>
+        <div style={s.heroEyebrow}>Tour Agency — International Travel</div>
         <div style={s.heroTitle}>Путешествия к морю</div>
-        <div style={s.heroSub}>Выберите тур своей мечты среди сотен направлений</div>
-        <form onSubmit={handleSearch} style={s.searchBox}>
-          <span style={{ fontSize: 18 }}>🔍</span>
+        <div style={s.heroSub}>Выберите тур своей мечты среди лучших направлений мира</div>
+        <form onSubmit={handleSearch} style={s.searchWrap}>
           <input style={s.searchInput} value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            placeholder="Страна, город, название тура..." />
+            placeholder="Страна, город или название тура..." />
           <button type="submit" style={s.searchBtn}>Найти</button>
         </form>
         <div style={s.wave} />
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 20px' }}>
-        <div style={s.filters}>
-          <span style={s.filterLabel}>🗂 Категория:</span>
-          {categories.map(cat => (
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 20px' }}>
+        <div style={s.filterBar}>
+          <span style={s.filterLabel}>Категория</span>
+          {CATEGORIES.map(cat => (
             <button key={cat} style={{ ...s.catBtn, ...(category === cat ? s.catBtnActive : {}) }}
               onClick={() => setCategory(cat)}>{cat}</button>
           ))}
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={s.filterLabel}>💰 Макс. цена:</span>
-            <input style={s.priceInput} type="number" placeholder="Без ограничений"
-              value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
-          </div>
+          <div style={s.divider} />
+          <span style={s.filterLabel}>Макс. цена</span>
+          <input style={s.priceInput} type="number" placeholder="Без ограничений"
+            value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
+          {(search || maxPrice) && (
+            <>
+              <div style={s.divider} />
+              <button className="btn btn-ghost btn-sm" onClick={() => { resetSearch(); setMaxPrice(''); }}>
+                Сбросить фильтры
+              </button>
+            </>
+          )}
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <span style={s.count}>{loading ? '' : `Найдено туров: ${tours.length}`}</span>
-          {search && (
-            <button className="btn btn-outline btn-sm" onClick={() => { setSearch(''); setSearchInput(''); }}>
-              ✕ Сбросить поиск
-            </button>
-          )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+          <span style={s.countLine}>{loading ? '' : `Найдено: ${tours.length} ${tours.length === 1 ? 'тур' : tours.length < 5 ? 'тура' : 'туров'}`}</span>
         </div>
 
         {loading ? (
           <div className="loading-center"><div className="spinner" /></div>
         ) : tours.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🔭</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: '#0a3d62', marginBottom: 8 }}>Туры не найдены</div>
-            <div>Попробуйте изменить параметры поиска</div>
+          <div style={s.emptyWrap}>
+            <div style={{ fontSize: 56, marginBottom: 14, opacity: 0.4 }}>[ ]</div>
+            <div style={s.emptyTitle}>Туры не найдены</div>
+            <div style={{ marginBottom: 20 }}>Попробуйте изменить параметры поиска или сбросить фильтры</div>
+            <button className="btn btn-secondary" onClick={() => { resetSearch(); setCategory('Все'); setMaxPrice(''); }}>
+              Показать все туры
+            </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: 22 }}>
             {tours.map(tour => (
-              <div key={tour.id} style={s.card}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(10,61,98,0.2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(10,61,98,0.1)'; }}
-                onClick={() => openTour(tour)}>
+              <div key={tour.id} style={s.card} onClick={() => openTour(tour)}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(30,42,56,0.16)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 18px rgba(30,42,56,0.09)'; }}>
                 {tour.image_url
-                  ? <img src={tour.image_url} alt={tour.title} style={s.img} onError={e => e.target.style.display='none'} />
-                  : <div style={s.imgPlaceholder}>🏝️</div>
+                  ? <img src={tour.image_url} alt={tour.title} style={s.img} onError={e => { e.target.style.display='none'; }} />
+                  : <div style={s.imgPlaceholder}>Нет изображения</div>
                 }
                 <div style={s.cardBody}>
-                  {tour.category && <span style={s.category}>{tour.category}</span>}
+                  {tour.category && <span style={s.catTag}>{tour.category}</span>}
                   <div style={s.cardTitle}>{tour.title}</div>
-                  <div style={s.location}>📍 {tour.location}, {tour.country}</div>
-                  <div style={s.rating}>
-                    <span style={{ color: '#f5a623' }}>{'★'.repeat(Math.round(tour.rating || 4))}</span>
-                    <span> {Number(tour.rating).toFixed(1)} · {tour.duration}</span>
-                  </div>
-                  <div style={s.footer}>
+                  <div style={s.location}>{tour.location}, {tour.country} &nbsp;&middot;&nbsp; {tour.duration}</div>
+                  <div style={{ marginBottom: 10 }}><StarRating value={tour.rating} /></div>
+                  <div style={s.cardFooter}>
                     <div>
-                      <span style={s.priceLabel}>от</span>
+                      <span style={s.priceFrom}>от</span>
                       <span style={s.price}>{Number(tour.price).toLocaleString('ru')} ₽</span>
                     </div>
-                    <button style={s.bookBtn}
-                      onClick={e => { e.stopPropagation(); openTour(tour); }}>
-                      Подробнее →
+                    <button style={s.detailBtn} onClick={e => { e.stopPropagation(); openTour(tour); }}>
+                      Подробнее
                     </button>
                   </div>
                 </div>
