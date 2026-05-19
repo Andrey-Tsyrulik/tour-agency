@@ -104,7 +104,7 @@ const AuthPage = () => {
     setLoading(true);
     try {
       const res = tab === 'login'
-        ? await authAPI.login({ email: form.email.trim(), password: form.password })
+        ? await authAPI.login({ email: form.email.trim(), password: form.password.toString() })
         : await authAPI.register({ name: form.name.trim(), email: form.email.trim(), password: form.password });
       login(res.data.token, res.data.user);
       navigate('/tours');

@@ -1,4 +1,4 @@
-,const express = require('express');
+const express = require('express');
 const cors = require('cors');
 
 const toursRoutes = require('./routes/tours');
@@ -25,7 +25,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Внутренняя ошибка сервера' });
 });
 
-const PORT = 3001;
+const PORT = 5000;
 app.listen(PORT, 'localhost', () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
