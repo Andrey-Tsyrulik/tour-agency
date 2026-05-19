@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const toursRoutes = require('./routes/tours');
 const authRoutes = require('./routes/auth');
+const bookingsRoutes = require('./routes/bookings');
 
 const app = express();
 
@@ -11,7 +12,9 @@ app.use(express.json());
 
 app.use('/tours', toursRoutes);
 app.use('/auth', authRoutes);
+app.use('/bookings', bookingsRoutes);
 
-app.listen(5000, () => {
-  console.log('Server running on http://localhost:5000');
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, 'localhost', () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
