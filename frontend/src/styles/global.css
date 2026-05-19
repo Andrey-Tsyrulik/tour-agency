@@ -214,6 +214,8 @@ body {
 .stat-card.burg { border-top-color: var(--burg-main); }
 .stat-card.blue { border-top-color: var(--blue-main); }
 
+.search-input-light::placeholder { color: rgba(255,255,255,0.60); }
+
 @media (max-width: 768px) {
   .grid-3, .grid-2 { grid-template-columns: 1fr; }
   .page-container { padding: 16px; }

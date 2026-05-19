@@ -4,6 +4,20 @@ const pool = require('../db');
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 
+router.get('/my', auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT b.*, t.title as tour_title, t.image_url as tour_image, t.location, t.country
+       FROM bookings b JOIN tours t ON b.tour_id=t.id WHERE b.user_id=$1 ORDER BY b.created_at DESC`,
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Ошибка при загрузке бронирований' });
+  }
+});
+
 router.get('/', auth, async (req, res) => {
   try {
     let query, params;
@@ -46,7 +60,7 @@ router.post('/', auth, async (req, res) => {
     let basePrice = Number(tour.price);
     let classMultiplier = travel_class === 'business' ? 1.8 : 1;
     let transportAdd = transport_type === 'plane' ? 5000 : transport_type === 'train' ? 2000 : transport_type === 'bus' ? 800 : 0;
-    const totalPrice = (basePrice + transportAdd * guestsNum) * classMultiplier * guestsNum;
+    const totalPrice = (basePrice * days + transportAdd * guestsNum) * classMultiplier * guestsNum;
 
     const result = await pool.query(
       `INSERT INTO bookings (user_id, tour_id, origin, transport_type, travel_class, arrival_date, departure_date, guests, total_price)

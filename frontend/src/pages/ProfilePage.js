@@ -32,7 +32,7 @@ const ProfilePage = () => {
   const fileRef = useRef();
 
   useEffect(() => {
-    if (tab==='bookings') load(bookingsAPI.getAll, setBookings);
+    if (tab==='bookings') load(bookingsAPI.getMy, setBookings);
     if (tab==='history')  load(paymentsAPI.getMy, setPayments);
     if (tab==='browsing') load(browsingAPI.getHistory, setBrowsing);
   }, [tab]);

@@ -298,11 +298,6 @@ const AuthPage = () => {
                 </span>
               </div>
 
-              {tab === 'login' && (
-                <div style={{ background: '#F0F7FC', borderRadius: 8, padding: '9px 13px', fontSize: 11.5, color: '#5A6A7E', textAlign: 'center', lineHeight: 1.6 }}>
-                  Администратор: admin@touragency.com / Admin@2024
-                </div>
-              )}
             </form>
           </div>
         </div>

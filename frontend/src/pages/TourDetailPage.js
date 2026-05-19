@@ -100,7 +100,10 @@ const TourDetailPage = () => {
     if (!tour) return 0;
     const t = TRANSPORT.find(t => t.type === form.transport_type);
     const classM = form.travel_class === 'business' ? 1.8 : 1;
-    return Math.round((Number(tour.price) + (t?.add || 0) * form.guests) * classM * form.guests);
+    const days = (form.arrival_date && form.departure_date)
+      ? Math.max(1, Math.ceil((new Date(form.departure_date) - new Date(form.arrival_date)) / 86400000))
+      : 1;
+    return Math.round((Number(tour.price) * days + (t?.add || 0) * form.guests) * classM * form.guests);
   };
 
   const createBooking = async () => {
