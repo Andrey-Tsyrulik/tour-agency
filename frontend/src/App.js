@@ -1,51 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Navbar from './components/Navbar';
+import AuthPage from './pages/AuthPage';
+import ToursPage from './pages/ToursPage';
+import TourDetailPage from './pages/TourDetailPage';
+import ProfilePage from './pages/ProfilePage';
+import SupportPage from './pages/SupportPage';
+import AgentDashboard from './pages/AgentDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import './styles/global.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const PrivateRoute = ({ children, roles }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="loading-center"><div className="spinner" /></div>;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (roles && !roles.includes(user.role)) return <Navigate to="/tours" replace />;
+  return children;
+};
 
-function App() {
-  const [tours, setTours] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    axios.get(`${API_URL}/tours`)
-      .then(res => {
-        setTours(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Could not load tours. Make sure the backend is running.');
-        setLoading(false);
-      });
-  }, []);
-
+const AppRoutes = () => {
+  const { user } = useAuth();
   return (
-    <div style={{ fontFamily: 'sans-serif', maxWidth: 800, margin: '40px auto', padding: '0 20px' }}>
-      <h1>Tour Agency</h1>
-      <p>Welcome! Browse our available tours below.</p>
-      {loading && <p>Loading tours...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {!loading && !error && tours.length === 0 && (
-        <p>No tours available yet.</p>
-      )}
-      <div>
-        {tours.map(tour => (
-          <div key={tour.id} style={{
-            border: '1px solid #ddd',
-            borderRadius: 8,
-            padding: 16,
-            marginBottom: 16
-          }}>
-            <h2>{tour.title}</h2>
-            <p>{tour.description}</p>
-            <p><strong>Price:</strong> ${tour.price}</p>
-            <p><strong>Duration:</strong> {tour.duration}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/auth" element={user ? <Navigate to="/tours" /> : <AuthPage />} />
+        <Route path="/tours" element={<PrivateRoute><ToursPage /></PrivateRoute>} />
+        <Route path="/tours/:id" element={<PrivateRoute><TourDetailPage /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+        <Route path="/support" element={<PrivateRoute><SupportPage /></PrivateRoute>} />
+        <Route path="/agent" element={<PrivateRoute roles={['agent','admin']}><AgentDashboard /></PrivateRoute>} />
+        <Route path="/admin" element={<PrivateRoute roles={['admin']}><AdminDashboard /></PrivateRoute>} />
+        <Route path="*" element={<Navigate to={user ? '/tours' : '/auth'} replace />} />
+      </Routes>
+    </>
   );
-}
+};
+
+const App = () => (
+  <BrowserRouter>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  </BrowserRouter>
+);
 
 export default App;
