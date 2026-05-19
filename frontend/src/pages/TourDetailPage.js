@@ -2,7 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toursAPI, bookingsAPI, paymentsAPI } from '../api';
 
-const CITIES = ['Москва','Санкт-Петербург','Новосибирск','Екатеринбург','Казань','Нижний Новгород','Краснодар','Ростов-на-Дону','Самара','Уфа','Омск','Воронеж','Пермь','Красноярск','Волгоград','Сочи','Калининград'];
+const CITIES = [
+  // Россия
+  'Москва','Санкт-Петербург','Новосибирск','Екатеринбург','Казань',
+  'Нижний Новгород','Краснодар','Ростов-на-Дону','Самара','Уфа',
+  'Омск','Воронеж','Пермь','Красноярск','Волгоград','Сочи','Калининград',
+  // Европа
+  'Лондон','Париж','Рим','Берлин','Мадрид','Барселона','Амстердам',
+  'Вена','Прага','Варшава','Будапешт','Лиссабон','Брюссель',
+  'Стокгольм','Копенгаген','Хельсинки','Осло','Цюрих','Дублин',
+  'Афины','Флоренция','Милан','Венеция','Дубровник','Рига','Таллин',
+  // Турция
+  'Стамбул','Анталия',
+  // Азия
+  'Токио','Пекин','Шанхай','Сеул','Гонконг','Сингапур','Бангкок',
+  'Куала-Лумпур','Денпасар','Пхукет','Дубай','Абу-Даби','Тель-Авив',
+  'Мумбаи','Дели','Катманду','Гоа','Коломбо','Ханой','Хошимин',
+  // Африка
+  'Каир','Марракеш','Кейптаун','Найроби','Хургада','Шарм-эль-Шейх',
+  // Америка
+  'Нью-Йорк','Лос-Анджелес','Чикаго','Майами','Лас-Вегас',
+  'Торонто','Ванкувер','Мехико','Канкун','Рио-де-Жанейро',
+  'Буэнос-Айрес','Лима','Гавана','Сантьяго',
+  // Океания
+  'Сидней','Мельбурн','Брисбен','Окленд',
+  // Острова
+  'Мале','Виктория','Порт-Луи','Нассау','Пунта-Кана','Гонолулу',
+  'Рейкьявик','Берген','Пунта-Аренас','Анкоридж',
+];
 const TRANSPORT = [
   { type: 'plane', label: 'Самолёт', desc: 'Быстро и комфортно', add: 5000 },
   { type: 'train', label: 'Поезд', desc: 'Живописный маршрут', add: 2000 },
@@ -89,6 +116,7 @@ const TourDetailPage = () => {
   const [cardName, setCardName] = useState('');
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [citySearch, setCitySearch] = useState('');
 
   useEffect(() => {
     toursAPI.getById(id)
@@ -255,14 +283,34 @@ const TourDetailPage = () => {
           {step === 1 && (
             <div style={s.stepCard}>
               <div style={s.stepTitle}>Откуда вы едете?</div>
-              <div style={s.stepDesc}>Выберите город отправления. Это поможет рассчитать стоимость транспорта.</div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:9, marginBottom:24 }}>
-                {CITIES.map(city => (
-                  <button key={city} onClick={() => setForm(f => ({ ...f, origin: city }))}
-                    style={{ ...s.cityBtn, borderColor: form.origin===city?'#7D1128':'#E8EDF3', background: form.origin===city?'#FBF0F2':'white', color: form.origin===city?'#7D1128':'#5A6A7E' }}>
-                    {city}
-                  </button>
-                ))}
+              <div style={s.stepDesc}>Выберите город отправления. Города назначения тура недоступны для выбора.</div>
+              <input
+                value={citySearch}
+                onChange={e => setCitySearch(e.target.value)}
+                placeholder="Поиск города..."
+                style={{ width:'100%', padding:'10px 16px', border:'1.5px solid #E8EDF3', borderRadius:50, fontFamily:'Montserrat,sans-serif', fontSize:13.5, outline:'none', marginBottom:16, background:'#FAFBFD', color:'#1E2A38' }}
+              />
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(145px,1fr))', gap:9, marginBottom:24, maxHeight:320, overflowY:'auto', paddingRight:4 }}>
+                {CITIES.filter(c => c.toLowerCase().includes(citySearch.toLowerCase())).map(city => {
+                  const isDestination = city.toLowerCase() === (tour?.location || '').toLowerCase();
+                  const isSelected = form.origin === city;
+                  return (
+                    <button key={city}
+                      disabled={isDestination}
+                      onClick={() => !isDestination && setForm(f => ({ ...f, origin: city }))}
+                      style={{ ...s.cityBtn,
+                        borderColor: isSelected ? '#7D1128' : isDestination ? '#E8EDF3' : '#E8EDF3',
+                        background: isSelected ? '#FBF0F2' : isDestination ? '#F8F9FB' : 'white',
+                        color: isSelected ? '#7D1128' : isDestination ? '#CDD6E0' : '#5A6A7E',
+                        cursor: isDestination ? 'not-allowed' : 'pointer',
+                        position: 'relative',
+                        textDecoration: isDestination ? 'line-through' : 'none',
+                      }}>
+                      {city}
+                      {isDestination && <span style={{ fontSize:9, display:'block', color:'#C4384F', fontWeight:700, marginTop:1 }}>НАЗНАЧЕНИЕ</span>}
+                    </button>
+                  );
+                })}
               </div>
               <div style={{ marginBottom:20 }}>
                 <div style={{ fontWeight:700, fontSize:13, color:'#1E2A38', marginBottom:10 }}>Количество гостей</div>

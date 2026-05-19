@@ -214,11 +214,76 @@ body {
 .stat-card.burg { border-top-color: var(--burg-main); }
 .stat-card.blue { border-top-color: var(--blue-main); }
 
-.search-input-light::placeholder { color: rgba(255,255,255,0.60); }
-
+/* ── MOBILE RESPONSIVE ──────────────────────────────────────── */
 @media (max-width: 768px) {
   .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .page-container { padding: 16px; }
-  .steps { flex-direction: column; gap: 2px; }
-  .tabs { flex-direction: column; border-radius: var(--radius); }
+  .page-container  { padding: 14px; }
+  .steps           { flex-direction: column; gap: 2px; }
+  .tabs            { flex-direction: column; border-radius: var(--radius); }
+  .table           { font-size: 12px; }
+  .table th, .table td { padding: 9px 10px; }
+
+  /* Hero sections */
+  .hero-section    { padding: 36px 16px 72px; }
+
+  /* Modals take full width on mobile */
+  .modal           { max-width: 100%; border-radius: var(--radius); }
+  .modal-header    { padding: 16px 18px; border-radius: var(--radius) var(--radius) 0 0; }
+  .modal-body      { padding: 16px 18px; }
+  .modal-footer    { padding: 12px 18px; }
+
+  /* Stat cards become 2-column on mobile */
+  .stat-card       { padding: 14px; }
 }
+
+/* Auth page — mobile */
+@media (max-width: 768px) {
+  .auth-layout {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+  .auth-left  { display: none !important; }
+  .auth-right { flex: 1 !important; min-height: 100vh; }
+}
+
+/* Tour detail booking wizard — mobile */
+@media (max-width: 640px) {
+  .booking-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+  .tour-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .booking-step-card {
+    padding: 20px 16px !important;
+  }
+}
+
+/* Tours page — mobile */
+@media (max-width: 640px) {
+  .tours-hero-title  { font-size: 28px !important; }
+  .tours-search-wrap { max-width: 100% !important; margin: 0 10px !important; }
+  .filter-bar        { gap: 8px !important; }
+}
+
+/* Profile page — mobile */
+@media (max-width: 640px) {
+  .profile-booking-row {
+    grid-template-columns: 56px 1fr !important;
+  }
+  .profile-booking-actions { align-items: flex-start !important; }
+}
+
+/* Admin / Agent dashboard — mobile */
+@media (max-width: 768px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (max-width: 480px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toursAPI, bookingsAPI } from '../api';
 
-const EMPTY = { title:'', description:'', price:'', duration:'', location:'', country:'', image_url:'', rating:4.5, category:'Пляжный', available:true };
+const EMPTY = { title:'', description:'', price:'', location:'', country:'', image_url:'', rating:4.5, category:'Пляжный', available:true };
 
 const StatusBadge = ({ status }) => {
   const map = { pending:['#FFF3CD','#856404','Ожидает'], confirmed:['#D1FAE5','#065F46','Подтверждено'], cancelled:['#FBF0F2','#7D1128','Отменено'], completed:['#EEF6FB','#3A6A8A','Завершено'] };
@@ -191,7 +191,7 @@ const AgentDashboard = () => {
                   <label style={s.label}>Название *</label>
                   <input style={s.input} required value={form.title} onChange={e => setForm(f => ({ ...f, title:e.target.value }))} />
                 </div>
-                {[['price','Цена (₽) *','number'],['duration','Длительность','text'],['location','Город','text'],['country','Страна','text'],['rating','Рейтинг (1–5)','number']].map(([field,label,type]) => (
+                {[['price','Цена (₽) *','number'],['location','Город','text'],['country','Страна','text'],['rating','Рейтинг (1–5)','number']].map(([field,label,type]) => (
                   <div key={field}>
                     <label style={s.label}>{label}</label>
                     <input type={type} style={s.input} step={field==='rating'?0.1:1} min={field==='rating'?1:0} max={field==='rating'?5:undefined}

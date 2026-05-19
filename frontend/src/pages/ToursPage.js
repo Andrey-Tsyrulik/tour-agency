@@ -50,7 +50,7 @@ const ToursPage = () => {
 
   const s = {
     hero: {
-      background: 'linear-gradient(135deg, #5C0F1A 0%, #7D1128 40%, #3A6A8A 100%)',
+      background: 'linear-gradient(150deg, #071828 0%, #0C2D52 35%, #0E4D82 65%, #1A6EA8 100%)',
       padding: '56px 20px 96px', textAlign: 'center', position: 'relative', overflow: 'hidden',
     },
     heroEyebrow: {
@@ -64,15 +64,13 @@ const ToursPage = () => {
     },
     heroSub: { color: 'rgba(255,255,255,0.78)', fontSize: 15, marginBottom: 32 },
     searchWrap: {
-      background: 'rgba(18, 45, 85, 0.65)', borderRadius: 60, padding: '6px 6px 6px 22px',
+      background: 'white', borderRadius: 60, padding: '6px 6px 6px 22px',
       display: 'flex', gap: 8, maxWidth: 580, margin: '0 auto',
-      boxShadow: '0 12px 40px rgba(0,0,0,0.30)',
-      border: '1px solid rgba(255,255,255,0.18)',
-      backdropFilter: 'blur(10px)',
+      boxShadow: '0 12px 40px rgba(0,0,0,0.28)',
     },
     searchInput: {
       flex: 1, border: 'none', outline: 'none', fontFamily: 'Montserrat, sans-serif',
-      fontSize: 14.5, color: 'white', background: 'transparent',
+      fontSize: 14.5, color: '#1E2A38', background: 'transparent',
     },
     searchBtn: {
       background: 'linear-gradient(135deg, #7D1128, #C4384F)',
@@ -158,8 +156,7 @@ const ToursPage = () => {
         <form onSubmit={handleSearch} style={s.searchWrap}>
           <input style={s.searchInput} value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            placeholder="Страна, город или название тура..."
-            className="search-input-light" />
+            placeholder="Страна, город или название тура..." />
           <button type="submit" style={s.searchBtn}>Найти</button>
         </form>
         <div style={s.wave} />
