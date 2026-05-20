@@ -16,6 +16,98 @@ const StatusBadge = ({ status }) => {
   return <span style={{ background:c.bg, color:c.color, fontSize:11, fontWeight:700, padding:'3px 11px', borderRadius:50, letterSpacing:0.3 }}>{c.label}</span>;
 };
 
+const StarRating = ({ value }) => {
+  const full = Math.round(value || 0);
+  return (
+    <span style={{ fontSize:15 }}>
+      {'★'.repeat(full)}<span style={{ color:'#DDD' }}>{'★'.repeat(5-full)}</span>
+    </span>
+  );
+};
+
+const RatingModal = ({ booking, onClose, onSubmit }) => {
+  const [hovered, setHovered] = useState(0);
+  const [selected, setSelected] = useState(0);
+  const [text, setText] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const submit = async () => {
+    if (!selected) return;
+    setSaving(true);
+    try {
+      await bookingsAPI.review(booking.id, { rating: selected, review_text: text });
+      setDone(true);
+      setTimeout(() => { onSubmit(); onClose(); }, 1400);
+    } catch (e) {
+      alert(e.response?.data?.message || 'Ошибка при сохранении отзыва');
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(10,20,36,0.65)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+      onClick={e => { if (e.target===e.currentTarget) onClose(); }}>
+      <div style={{ background:'white', borderRadius:22, padding:'36px 40px', maxWidth:460, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,0.22)', textAlign:'center' }}>
+        {done ? (
+          <div>
+            <div style={{ fontSize:52, marginBottom:14 }}>🌟</div>
+            <div style={{ fontFamily:"'Playfair Display', serif", fontSize:22, color:'#1E2A38', fontWeight:700, marginBottom:8 }}>Спасибо за отзыв!</div>
+            <div style={{ color:'#5A6A7E', fontSize:14 }}>Ваша оценка помогает другим путешественникам выбрать тур.</div>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontFamily:"'Playfair Display', serif", fontSize:22, color:'#1E2A38', fontWeight:700, marginBottom:6 }}>Оцените путешествие</div>
+            <div style={{ color:'#5A6A7E', fontSize:13.5, marginBottom:28 }}>«{booking.tour_title}»</div>
+
+            <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:24 }}>
+              {[1,2,3,4,5].map(n => (
+                <span
+                  key={n}
+                  onMouseEnter={() => setHovered(n)}
+                  onMouseLeave={() => setHovered(0)}
+                  onClick={() => setSelected(n)}
+                  style={{
+                    fontSize: (hovered||selected) >= n ? 42 : 36,
+                    cursor:'pointer',
+                    color: (hovered||selected) >= n ? '#F5C518' : '#DDE3EA',
+                    transition:'all 0.15s',
+                    display:'inline-block',
+                    transform: (hovered||selected) >= n ? 'scale(1.18)' : 'scale(1)',
+                    filter: (hovered||selected) >= n ? 'drop-shadow(0 2px 6px rgba(245,197,24,0.5))' : 'none',
+                    lineHeight: 1.1,
+                  }}>★</span>
+              ))}
+            </div>
+
+            {selected > 0 && (
+              <div style={{ textAlign:'left', marginBottom:18 }}>
+                <div style={{ fontWeight:700, fontSize:12, color:'#4E8098', marginBottom:6, textTransform:'uppercase', letterSpacing:0.5 }}>Ваш отзыв (необязательно)</div>
+                <textarea
+                  value={text}
+                  onChange={e => setText(e.target.value)}
+                  placeholder="Расскажите о вашем опыте..."
+                  rows={3}
+                  style={{ width:'100%', padding:'10px 14px', border:'1.5px solid #E8EDF3', borderRadius:10, fontFamily:'Montserrat,sans-serif', fontSize:13.5, outline:'none', resize:'none', color:'#1E2A38', background:'#FAFBFD', boxSizing:'border-box' }}
+                />
+              </div>
+            )}
+
+            <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
+              <button onClick={onClose} style={{ padding:'10px 22px', border:'1.5px solid #E8EDF3', borderRadius:50, fontFamily:'Montserrat,sans-serif', fontWeight:600, fontSize:13, cursor:'pointer', background:'white', color:'#5A6A7E' }}>
+                Позже
+              </button>
+              <button onClick={submit} disabled={!selected || saving}
+                style={{ padding:'10px 28px', background: selected ? 'linear-gradient(135deg,#7D1128,#C4384F)' : '#E8EDF3', color: selected ? 'white' : '#8A9BB0', border:'none', borderRadius:50, fontFamily:'Montserrat,sans-serif', fontWeight:700, fontSize:13, cursor: selected ? 'pointer' : 'not-allowed', boxShadow: selected ? '0 4px 14px rgba(125,17,40,0.3)' : 'none', transition:'all 0.2s' }}>
+                {saving ? 'Сохраняем...' : 'Отправить'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const ProfilePage = () => {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +121,7 @@ const ProfilePage = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [ratingModal, setRatingModal] = useState(null);
   const fileRef = useRef();
 
   useEffect(() => {
@@ -45,7 +138,7 @@ const ProfilePage = () => {
 
   const cancelBooking = async (id) => {
     if (!window.confirm('Отменить это бронирование?')) return;
-    try { await bookingsAPI.cancel(id); load(bookingsAPI.getAll, setBookings); } catch (e) { alert(e.response?.data?.message || 'Ошибка'); }
+    try { await bookingsAPI.cancel(id); load(bookingsAPI.getMy, setBookings); } catch (e) { alert(e.response?.data?.message || 'Ошибка'); }
   };
 
   const handleFile = (e) => {
@@ -106,6 +199,14 @@ const ProfilePage = () => {
 
   return (
     <div>
+      {ratingModal && (
+        <RatingModal
+          booking={ratingModal}
+          onClose={() => setRatingModal(null)}
+          onSubmit={() => load(bookingsAPI.getMy, setBookings)}
+        />
+      )}
+
       <div style={s.header}>
         <div style={{ maxWidth:1000, margin:'0 auto', display:'flex', alignItems:'center', gap:22 }}>
           <div style={s.avatarWrap} onClick={() => fileRef.current?.click()}>
@@ -164,13 +265,31 @@ const ProfilePage = () => {
               <>
                 <h3 style={{ fontFamily:"'Playfair Display', serif", color:'#1E2A38', marginBottom:14, marginTop:24, fontSize:18 }}>История поездок</h3>
                 {past.map(b => (
-                  <div key={b.id} style={{ ...s.bookRow, opacity:0.7 }}>
-                    <div style={s.thumb}>Архив</div>
+                  <div key={b.id} style={{ ...s.bookRow, opacity: b.status==='cancelled' ? 0.6 : 1 }}>
+                    {b.tour_image
+                      ? <img src={b.tour_image} alt="" style={{ ...s.thumb, objectFit:'cover' }} onError={e => e.target.style.display='none'} />
+                      : <div style={s.thumb}>{b.status==='cancelled' ? 'Отмена' : 'Архив'}</div>
+                    }
                     <div>
                       <div style={{ fontWeight:700, color:'#1E2A38', marginBottom:3 }}>{b.tour_title}</div>
-                      <div style={{ fontSize:12.5, color:'#5A6A7E' }}>{b.arrival_date} — {b.departure_date} &nbsp;&middot;&nbsp; {Number(b.total_price).toLocaleString('ru')} ₽</div>
+                      <div style={{ fontSize:12.5, color:'#5A6A7E', marginBottom:3 }}>{b.arrival_date} — {b.departure_date} &nbsp;&middot;&nbsp; {Number(b.total_price).toLocaleString('ru')} ₽</div>
+                      {b.status==='completed' && b.user_rating && (
+                        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                          <span style={{ color:'#F5C518', fontSize:13 }}><StarRating value={b.user_rating} /></span>
+                          <span style={{ fontSize:11.5, color:'#5A6A7E' }}>Ваша оценка: {b.user_rating}/5</span>
+                        </div>
+                      )}
                     </div>
-                    <StatusBadge status={b.status} />
+                    <div style={{ display:'flex', flexDirection:'column', gap:8, alignItems:'flex-end' }}>
+                      <StatusBadge status={b.status} />
+                      {b.status==='completed' && !b.user_rating && (
+                        <button
+                          onClick={() => setRatingModal(b)}
+                          style={{ fontSize:12, color:'white', background:'linear-gradient(135deg,#7D1128,#C4384F)', border:'none', borderRadius:50, cursor:'pointer', fontWeight:700, padding:'5px 14px', boxShadow:'0 3px 10px rgba(125,17,40,0.3)' }}>
+                          ★ Оценить
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </>

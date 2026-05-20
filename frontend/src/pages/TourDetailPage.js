@@ -31,11 +31,83 @@ const CITIES = [
   'Рейкьявик','Берген','Пунта-Аренас','Анкоридж',
 ];
 const TRANSPORT = [
-  { type: 'plane', label: 'Самолёт', desc: 'Быстро и комфортно', add: 5000 },
-  { type: 'train', label: 'Поезд', desc: 'Живописный маршрут', add: 2000 },
-  { type: 'bus', label: 'Автобус', desc: 'Бюджетный вариант', add: 800 },
-  { type: 'car', label: 'Автомобиль', desc: 'Самостоятельно', add: 0 },
+  { type: 'plane', label: 'Самолёт', desc: 'Быстро и комфортно' },
+  { type: 'train', label: 'Поезд', desc: 'Живописный маршрут' },
+  { type: 'bus', label: 'Автобус', desc: 'Бюджетный вариант' },
+  { type: 'car', label: 'Автомобиль', desc: 'Самостоятельно' },
 ];
+
+const CITY_COORDS = {
+  'Москва':{lat:55.75,lon:37.62},'Санкт-Петербург':{lat:59.93,lon:30.32},
+  'Новосибирск':{lat:54.99,lon:82.90},'Екатеринбург':{lat:56.84,lon:60.60},
+  'Казань':{lat:55.83,lon:49.07},'Нижний Новгород':{lat:56.33,lon:44.00},
+  'Краснодар':{lat:45.04,lon:38.98},'Ростов-на-Дону':{lat:47.22,lon:39.72},
+  'Самара':{lat:53.19,lon:50.15},'Уфа':{lat:54.74,lon:55.97},
+  'Омск':{lat:54.99,lon:73.37},'Воронеж':{lat:51.67,lon:39.19},
+  'Пермь':{lat:58.01,lon:56.25},'Красноярск':{lat:56.01,lon:92.87},
+  'Волгоград':{lat:48.71,lon:44.51},'Сочи':{lat:43.60,lon:39.73},
+  'Калининград':{lat:54.71,lon:20.51},
+  'Лондон':{lat:51.51,lon:-0.13},'Париж':{lat:48.86,lon:2.35},
+  'Рим':{lat:41.90,lon:12.50},'Берлин':{lat:52.52,lon:13.41},
+  'Мадрид':{lat:40.42,lon:-3.70},'Барселона':{lat:41.39,lon:2.16},
+  'Амстердам':{lat:52.37,lon:4.90},'Вена':{lat:48.21,lon:16.37},
+  'Прага':{lat:50.08,lon:14.43},'Варшава':{lat:52.23,lon:21.01},
+  'Будапешт':{lat:47.50,lon:19.04},'Лиссабон':{lat:38.72,lon:-9.14},
+  'Брюссель':{lat:50.85,lon:4.35},'Стокгольм':{lat:59.33,lon:18.07},
+  'Копенгаген':{lat:55.68,lon:12.57},'Хельсинки':{lat:60.17,lon:24.94},
+  'Осло':{lat:59.91,lon:10.75},'Цюрих':{lat:47.38,lon:8.54},
+  'Дублин':{lat:53.33,lon:-6.25},'Афины':{lat:37.98,lon:23.73},
+  'Флоренция':{lat:43.77,lon:11.26},'Милан':{lat:45.47,lon:9.19},
+  'Венеция':{lat:45.44,lon:12.32},'Дубровник':{lat:42.65,lon:18.09},
+  'Рига':{lat:56.95,lon:24.11},'Таллин':{lat:59.44,lon:24.75},
+  'Стамбул':{lat:41.01,lon:28.95},'Анталия':{lat:36.90,lon:30.70},
+  'Токио':{lat:35.69,lon:139.69},'Пекин':{lat:39.91,lon:116.39},
+  'Шанхай':{lat:31.23,lon:121.47},'Сеул':{lat:37.57,lon:126.98},
+  'Гонконг':{lat:22.33,lon:114.17},'Сингапур':{lat:1.35,lon:103.82},
+  'Бангкок':{lat:13.75,lon:100.52},'Куала-Лумпур':{lat:3.14,lon:101.69},
+  'Денпасар':{lat:-8.67,lon:115.22},'Пхукет':{lat:7.88,lon:98.39},
+  'Дубай':{lat:25.20,lon:55.27},'Абу-Даби':{lat:24.47,lon:54.37},
+  'Тель-Авив':{lat:32.07,lon:34.78},'Мумбаи':{lat:19.08,lon:72.88},
+  'Дели':{lat:28.61,lon:77.21},'Катманду':{lat:27.72,lon:85.32},
+  'Гоа':{lat:15.30,lon:74.12},'Коломбо':{lat:6.93,lon:79.85},
+  'Ханой':{lat:21.03,lon:105.85},'Хошимин':{lat:10.82,lon:106.63},
+  'Каир':{lat:30.04,lon:31.24},'Марракеш':{lat:31.63,lon:-7.99},
+  'Кейптаун':{lat:-33.93,lon:18.42},'Найроби':{lat:-1.29,lon:36.82},
+  'Хургада':{lat:27.26,lon:33.81},'Шарм-эль-Шейх':{lat:27.91,lon:34.33},
+  'Нью-Йорк':{lat:40.71,lon:-74.01},'Лос-Анджелес':{lat:34.05,lon:-118.24},
+  'Чикаго':{lat:41.88,lon:-87.63},'Майами':{lat:25.77,lon:-80.19},
+  'Лас-Вегас':{lat:36.17,lon:-115.14},'Торонто':{lat:43.65,lon:-79.38},
+  'Ванкувер':{lat:49.25,lon:-123.12},'Мехико':{lat:19.43,lon:-99.13},
+  'Канкун':{lat:21.16,lon:-86.85},'Рио-де-Жанейро':{lat:-22.91,lon:-43.17},
+  'Буэнос-Айрес':{lat:-34.60,lon:-58.38},'Лима':{lat:-12.04,lon:-77.04},
+  'Гавана':{lat:23.13,lon:-82.38},'Сантьяго':{lat:-33.45,lon:-70.67},
+  'Сидней':{lat:-33.87,lon:151.21},'Мельбурн':{lat:-37.81,lon:144.96},
+  'Брисбен':{lat:-27.47,lon:153.02},'Окленд':{lat:-36.87,lon:174.76},
+  'Мале':{lat:4.17,lon:73.51},'Виктория':{lat:-4.62,lon:55.45},
+  'Порт-Луи':{lat:-20.16,lon:57.50},'Нассау':{lat:25.06,lon:-77.35},
+  'Пунта-Кана':{lat:18.58,lon:-68.40},'Гонолулу':{lat:21.31,lon:-157.86},
+  'Рейкьявик':{lat:64.14,lon:-21.90},'Берген':{lat:60.39,lon:5.32},
+  'Пунта-Аренас':{lat:-53.16,lon:-70.91},'Анкоридж':{lat:61.22,lon:-149.90},
+};
+
+const haversine = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+};
+
+const TRANSPORT_RATE = { plane: 7.5, train: 4.0, bus: 1.8, car: 3.5 };
+const TRANSPORT_MIN  = { plane: 8000, train: 3000, bus: 1500, car: 800 };
+
+const getTransportCost = (origin, destination, type) => {
+  const orig = CITY_COORDS[origin];
+  const dest = CITY_COORDS[destination];
+  if (!orig || !dest) return TRANSPORT_MIN[type] || 2000;
+  const km = haversine(orig.lat, orig.lon, dest.lat, dest.lon);
+  return Math.max(TRANSPORT_MIN[type] || 1000, Math.round(km * TRANSPORT_RATE[type]));
+};
 const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const WEEKDAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
@@ -126,18 +198,20 @@ const TourDetailPage = () => {
 
   const calcPrice = () => {
     if (!tour) return 0;
-    const t = TRANSPORT.find(t => t.type === form.transport_type);
-    const classM = form.travel_class === 'business' ? 1.8 : 1;
+    const classM = form.travel_class === 'business' && form.transport_type !== 'car' ? 1.8 : 1;
     const days = (form.arrival_date && form.departure_date)
       ? Math.max(1, Math.ceil((new Date(form.departure_date) - new Date(form.arrival_date)) / 86400000))
       : 1;
-    return Math.round((Number(tour.price) * days + (t?.add || 0) * form.guests) * classM * form.guests);
+    const transportCost = form.origin
+      ? getTransportCost(form.origin, tour.location, form.transport_type)
+      : TRANSPORT_MIN[form.transport_type] || 2000;
+    return Math.round((Number(tour.price) * days * form.guests + transportCost * form.guests) * classM);
   };
 
   const createBooking = async () => {
     setError(''); setProcessing(true);
     try {
-      const res = await bookingsAPI.create({ ...form, tour_id: tour.id });
+      const res = await bookingsAPI.create({ ...form, tour_id: tour.id, total_price: calcPrice() });
       setBooking(res.data); setStep(4);
     } catch (err) { setError(err.response?.data?.message || 'Ошибка при создании бронирования'); }
     finally { setProcessing(false); }
@@ -235,7 +309,7 @@ const TourDetailPage = () => {
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(30,42,56,0.75) 0%, transparent 55%)', padding:'24px 28px', display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
                   {tour.category && <span style={{ display:'inline-block', background:'rgba(255,255,255,0.2)', color:'white', fontSize:10, fontWeight:700, padding:'3px 11px', borderRadius:50, marginBottom:8, textTransform:'uppercase', letterSpacing:1, width:'fit-content' }}>{tour.category}</span>}
                   <div style={{ fontFamily:"'Playfair Display', serif", fontSize:30, fontWeight:700, color:'white', marginBottom:5 }}>{tour.title}</div>
-                  <div style={{ color:'rgba(255,255,255,0.8)', fontSize:14 }}>{tour.location}, {tour.country} &nbsp;&middot;&nbsp; {tour.duration}</div>
+                  <div style={{ color:'rgba(255,255,255,0.8)', fontSize:14 }}>{tour.location}, {tour.country}</div>
                 </div>
               </div>
               {/* Description */}
@@ -245,7 +319,7 @@ const TourDetailPage = () => {
               </div>
               {/* Info cards */}
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12 }}>
-                {[['Длительность', tour.duration],['Направление', tour.location],['Страна', tour.country]].map(([l,v]) => (
+                {[['Направление', tour.location],['Страна', tour.country],['Рейтинг', `${Number(tour.rating||4).toFixed(1)} / 5.0 ★`]].map(([l,v]) => (
                   <div key={l} style={{ background:'white', borderRadius:12, padding:'16px', textAlign:'center', boxShadow:'0 2px 10px rgba(30,42,56,0.07)', borderTop:'3px solid #C4384F' }}>
                     <div style={{ fontSize:10, color:'#5A6A7E', fontWeight:700, textTransform:'uppercase', letterSpacing:0.5, marginBottom:5 }}>{l}</div>
                     <div style={{ fontWeight:700, color:'#1E2A38', fontSize:14 }}>{v}</div>
@@ -347,17 +421,22 @@ const TourDetailPage = () => {
                       <div style={{ fontSize:12, color:'#5A6A7E' }}>{t.desc}</div>
                     </div>
                     <div style={{ fontWeight:700, color: form.transport_type===t.type?'#7D1128':'#4E8098', fontSize:13.5 }}>
-                      {t.add > 0 ? `+${t.add.toLocaleString('ru')} ₽` : 'Включено'}
+                      {form.origin
+                        ? `+${getTransportCost(form.origin, tour.location, t.type).toLocaleString('ru')} ₽`
+                        : <span style={{ fontSize:11, color:'#8A9BB0', fontWeight:500 }}>зависит от маршрута</span>}
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ marginBottom:22 }}>
-                <div style={{ fontWeight:700, color:'#1E2A38', marginBottom:10, fontSize:13.5 }}>Класс обслуживания</div>
-                <div style={{ display:'flex', gap:10 }}>
+              <div style={{ marginBottom:22, opacity: form.transport_type==='car' ? 0.38 : 1, transition:'opacity 0.2s' }}>
+                <div style={{ fontWeight:700, color:'#1E2A38', marginBottom:10, fontSize:13.5 }}>
+                  Класс обслуживания
+                  {form.transport_type==='car' && <span style={{ fontWeight:400, fontSize:11, color:'#8A9BB0', marginLeft:8 }}>(недоступно для автомобиля)</span>}
+                </div>
+                <div style={{ display:'flex', gap:10, pointerEvents: form.transport_type==='car' ? 'none' : 'auto' }}>
                   {[['economy','Эконом','Стандартный комфорт'],['business','Бизнес','Повышенный комфорт · ×1.8 к цене']].map(([cls,label,desc]) => (
-                    <div key={cls} style={{ ...s.optionCard, flex:1, ...(form.travel_class===cls?s.optionActive:{}) }}
-                      onClick={() => setForm(f => ({ ...f, travel_class: cls }))}>
+                    <div key={cls} style={{ ...s.optionCard, flex:1, ...(form.travel_class===cls && form.transport_type!=='car'?s.optionActive:{}) }}
+                      onClick={() => form.transport_type!=='car' && setForm(f => ({ ...f, travel_class: cls }))}>
                       <div>
                         <div style={{ fontWeight:700, color:'#1E2A38', fontSize:14 }}>{label}</div>
                         <div style={{ fontSize:11.5, color:'#5A6A7E' }}>{desc}</div>

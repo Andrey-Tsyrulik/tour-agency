@@ -32,7 +32,7 @@ const Globe3D = ({ size = 340 }) => {
       texCanvas.width  = img.naturalWidth;
       texCanvas.height = img.naturalHeight;
       const tCtx = texCanvas.getContext('2d');
-      tCtx.filter = 'saturate(2.3) brightness(1.14) contrast(1.10)';
+      tCtx.filter = 'saturate(5.0) contrast(1.50) brightness(0.95)';
       tCtx.drawImage(img, 0, 0);
       imgLoaded = true;
     };
@@ -80,11 +80,11 @@ const Globe3D = ({ size = 340 }) => {
 
         // Pole darkening (latitude compression shadow)
         const pole = ctx.createLinearGradient(0, 0, 0, size);
-        pole.addColorStop(0,    'rgba(0,0,22,0.65)');
-        pole.addColorStop(0.09, 'rgba(0,0,12,0.22)');
+        pole.addColorStop(0,    'rgba(0,0,18,0.50)');
+        pole.addColorStop(0.09, 'rgba(0,0,10,0.15)');
         pole.addColorStop(0.5,  'rgba(0,0,0,0)');
-        pole.addColorStop(0.91, 'rgba(0,0,12,0.22)');
-        pole.addColorStop(1,    'rgba(0,0,22,0.68)');
+        pole.addColorStop(0.91, 'rgba(0,0,10,0.15)');
+        pole.addColorStop(1,    'rgba(0,0,18,0.52)');
         ctx.fillStyle = pole;
         ctx.fillRect(0, 0, size, size);
 

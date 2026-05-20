@@ -191,7 +191,7 @@ const AgentDashboard = () => {
                   <label style={s.label}>Название *</label>
                   <input style={s.input} required value={form.title} onChange={e => setForm(f => ({ ...f, title:e.target.value }))} />
                 </div>
-                {[['price','Цена (₽) *','number'],['location','Город','text'],['country','Страна','text'],['rating','Рейтинг (1–5)','number']].map(([field,label,type]) => (
+                {[['price','Цена (₽) *','number'],['location','Город','text'],['country','Страна','text']].map(([field,label,type]) => (
                   <div key={field}>
                     <label style={s.label}>{label}</label>
                     <input type={type} style={s.input} step={field==='rating'?0.1:1} min={field==='rating'?1:0} max={field==='rating'?5:undefined}

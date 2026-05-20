@@ -42,6 +42,7 @@ export const bookingsAPI = {
   create: (data) => API.post('/bookings', data),
   updateStatus: (id, status) => API.put(`/bookings/${id}/status`, { status }),
   cancel: (id) => API.delete(`/bookings/${id}`),
+  review: (id, data) => API.post(`/bookings/${id}/review`, data),
 };
 
 export const paymentsAPI = {

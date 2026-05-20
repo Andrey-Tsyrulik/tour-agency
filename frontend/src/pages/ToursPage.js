@@ -21,10 +21,11 @@ const ToursPage = () => {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [category, setCategory] = useState('Все');
+  const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => { fetchTours(); }, [search, category, maxPrice]);
+  useEffect(() => { fetchTours(); }, [search, category, minPrice, maxPrice]);
 
   const fetchTours = async () => {
     setLoading(true); setError('');
@@ -32,6 +33,7 @@ const ToursPage = () => {
       const params = {};
       if (search) params.search = search;
       if (category !== 'Все') params.category = category;
+      if (minPrice) params.minPrice = minPrice;
       if (maxPrice) params.maxPrice = maxPrice;
       const res = await toursAPI.getAll(params);
       setTours(res.data);
@@ -170,13 +172,16 @@ const ToursPage = () => {
               onClick={() => setCategory(cat)}>{cat}</button>
           ))}
           <div style={s.divider} />
-          <span style={s.filterLabel}>Макс. цена</span>
-          <input style={s.priceInput} type="number" placeholder="Без ограничений"
+          <span style={s.filterLabel}>Цена (₽)</span>
+          <input style={{ ...s.priceInput, width: 125 }} type="number" placeholder="от"
+            value={minPrice} onChange={e => setMinPrice(e.target.value)} />
+          <span style={{ color:'#8A9BB0', fontSize:13 }}>—</span>
+          <input style={{ ...s.priceInput, width: 125 }} type="number" placeholder="до"
             value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
-          {(search || maxPrice) && (
+          {(search || minPrice || maxPrice) && (
             <>
               <div style={s.divider} />
-              <button className="btn btn-ghost btn-sm" onClick={() => { resetSearch(); setMaxPrice(''); }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => { resetSearch(); setMinPrice(''); setMaxPrice(''); }}>
                 Сбросить фильтры
               </button>
             </>

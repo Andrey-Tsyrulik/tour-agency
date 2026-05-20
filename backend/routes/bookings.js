@@ -40,7 +40,7 @@ router.get('/', auth, async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
   try {
-    const { tour_id, origin, transport_type, travel_class, arrival_date, departure_date, guests } = req.body;
+    const { tour_id, origin, transport_type, travel_class, arrival_date, departure_date, guests, total_price } = req.body;
     if (!tour_id || !origin || !arrival_date || !departure_date)
       return res.status(400).json({ message: 'Заполните все обязательные поля' });
 
@@ -55,22 +55,60 @@ router.post('/', auth, async (req, res) => {
     const tour = tourResult.rows[0];
     if (!tour) return res.status(404).json({ message: 'Тур не найден' });
 
-    const days = Math.ceil((new Date(departure_date) - new Date(arrival_date)) / (1000*60*60*24));
     const guestsNum = guests || 1;
-    let basePrice = Number(tour.price);
-    let classMultiplier = travel_class === 'business' ? 1.8 : 1;
-    let transportAdd = transport_type === 'plane' ? 5000 : transport_type === 'train' ? 2000 : transport_type === 'bus' ? 800 : 0;
-    const totalPrice = (basePrice * days + transportAdd * guestsNum) * classMultiplier * guestsNum;
+    let finalPrice;
+    if (total_price && Number(total_price) > 0) {
+      finalPrice = Number(total_price).toFixed(2);
+    } else {
+      const days = Math.ceil((new Date(departure_date) - new Date(arrival_date)) / (1000*60*60*24));
+      const classMultiplier = travel_class === 'business' && transport_type !== 'car' ? 1.8 : 1;
+      const transportAdd = transport_type === 'plane' ? 8000 : transport_type === 'train' ? 3000 : transport_type === 'bus' ? 1500 : 800;
+      finalPrice = ((Number(tour.price) * days * guestsNum) + (transportAdd * guestsNum)) * classMultiplier;
+      finalPrice = finalPrice.toFixed(2);
+    }
 
     const result = await pool.query(
       `INSERT INTO bookings (user_id, tour_id, origin, transport_type, travel_class, arrival_date, departure_date, guests, total_price)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [req.user.id, tour_id, origin, transport_type, travel_class, arrival_date, departure_date, guestsNum, totalPrice.toFixed(2)]
+      [req.user.id, tour_id, origin, transport_type, travel_class, arrival_date, departure_date, guestsNum, finalPrice]
     );
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Ошибка при создании бронирования' });
+  }
+});
+
+router.post('/:id/review', auth, async (req, res) => {
+  try {
+    const { rating, review_text } = req.body;
+    if (!rating || Number(rating) < 1 || Number(rating) > 5)
+      return res.status(400).json({ message: 'Оценка должна быть от 1 до 5' });
+
+    const bRes = await pool.query('SELECT * FROM bookings WHERE id=$1', [req.params.id]);
+    const booking = bRes.rows[0];
+    if (!booking) return res.status(404).json({ message: 'Бронирование не найдено' });
+    if (booking.user_id !== req.user.id) return res.status(403).json({ message: 'Нет доступа' });
+    if (booking.status !== 'completed') return res.status(400).json({ message: 'Отзыв можно оставить только после завершения тура' });
+    if (booking.user_rating) return res.status(400).json({ message: 'Вы уже оставили отзыв об этом туре' });
+
+    await pool.query(
+      'UPDATE bookings SET user_rating=$1, user_review=$2 WHERE id=$3',
+      [Number(rating), review_text || '', req.params.id]
+    );
+
+    const avgRes = await pool.query(
+      'SELECT AVG(user_rating)::numeric(3,2) as avg FROM bookings WHERE tour_id=$1 AND user_rating IS NOT NULL',
+      [booking.tour_id]
+    );
+    if (avgRes.rows[0]?.avg) {
+      await pool.query('UPDATE tours SET rating=$1 WHERE id=$2', [avgRes.rows[0].avg, booking.tour_id]);
+    }
+
+    res.json({ message: 'Спасибо за ваш отзыв!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Ошибка при сохранении отзыва' });
   }
 });
 

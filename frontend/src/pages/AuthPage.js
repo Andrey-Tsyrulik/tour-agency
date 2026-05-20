@@ -118,7 +118,7 @@ const AuthPage = () => {
   const s = {
     page: {
       minHeight: '100vh',
-      background: 'linear-gradient(160deg, #C8E8F8 0%, #A8D4F0 25%, #85BFEA 55%, #6AAEE0 80%, #4E96D4 100%)',
+      background: 'linear-gradient(160deg, #071828 0%, #0C2D52 30%, #0E3D6E 60%, #0A2848 85%, #060F1E 100%)',
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
       position: 'relative',

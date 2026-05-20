@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const toursRoutes = require('./routes/tours');
 const authRoutes = require('./routes/auth');
@@ -25,7 +26,16 @@ app.use('/api/browsing', browsingRoutes);
 const buildPath = path.join(__dirname, '../frontend/build');
 app.use(express.static(buildPath));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(buildPath, 'index.html'));
+  const indexPath = path.join(buildPath, 'index.html');
+  if (!fs.existsSync(indexPath)) {
+    return res.status(200).send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Tour Agency API</title>
+      <style>body{font-family:monospace;padding:40px;background:#071828;color:#7EC8F0;}h1{color:#C4384F;}code{background:#0C2D52;padding:4px 10px;border-radius:6px;}</style></head>
+      <body><h1>Tour Agency — API Server</h1>
+      <p>Backend is running. Frontend is not built yet.</p>
+      <p>To build the frontend, run: <code>cd frontend && npm install && npm run build</code></p>
+      <p>Then restart the server.</p></body></html>`);
+  }
+  res.sendFile(indexPath);
 });
 
 app.use((err, req, res, next) => {
