@@ -1,4 +1,144 @@
-# Tour Agency — Документация проекта
+# Tour Agency — Документация проекта для дипломной работы
+
+## Промпт для Qwen (скопируй и вставь целиком)
+
+```
+Напиши дипломную работу по следующему проекту. Используй академический стиль изложения на русском языке. Объём — не менее 60 страниц. Включи все стандартные разделы: введение, 4 главы, заключение, список литературы (не менее 30 источников по ГОСТ), приложения с листингами кода и скриншотами.
+
+=== ТЕМА ===
+«Разработка веб-приложения для управления туристическим агентством»
+
+=== СТЕК ТЕХНОЛОГИЙ ===
+Frontend: React 18, React Router DOM v7, Axios, Canvas 2D API (3D-глобус), CSS-in-JS
+Backend: Node.js 20, Express.js, JWT (jsonwebtoken), bcryptjs
+База данных: PostgreSQL 16 (pg / node-postgres)
+Инфраструктура: Replit (облачная платформа)
+Архитектура: REST API + SPA (Single Page Application), клиент-серверная, порты 3000 (фронт) / 3001 (бэк)
+
+=== СТРУКТУРА ПРОЕКТА ===
+backend/
+  server.js          — точка входа, инициализация БД, автосоздание таблиц и аккаунта администратора
+  db.js              — пул подключений PostgreSQL с безопасным парсингом DATABASE_URL
+  middleware/auth.js — JWT middleware (защита маршрутов)
+  middleware/role.js — проверка роли пользователя
+  routes/auth.js     — POST /register, POST /login, GET /me, PUT /me
+  routes/tours.js    — CRUD туров, фильтрация по стране/категории/цене/поиску
+  routes/bookings.js — управление бронированиями, смена статусов
+  routes/payments.js — проведение и история оплат
+  routes/users.js    — администрирование пользователей
+  routes/browsing.js — история просмотров туров (макс. 20 записей на пользователя)
+
+frontend/src/
+  App.js                  — маршрутизация, защита роутов по роли
+  contexts/AuthContext.js — глобальное состояние аутентификации (React Context + localStorage)
+  api/                    — Axios-клиент с автоподстановкой токена
+  components/Globe3D.js   — 3D-глобус: Canvas scanline projection, текстура NASA 2048px, атмосфера, limb darkening
+  components/Navbar.js    — навигация с ролевым отображением пунктов
+  pages/AuthPage.js       — страница входа/регистрации (светло-голубой дневной фон, облака, глобус)
+  pages/ToursPage.js      — каталог туров с поиском и фильтрами
+  pages/TourDetailPage.js — карточка тура + пошаговый мастер бронирования
+  pages/ProfilePage.js    — личный кабинет (история броней, смена пароля, аватар)
+  pages/AdminDashboard.js — панель администратора (статистика, CRUD туров, управление пользователями)
+  pages/AgentDashboard.js — панель агента (все бронирования, смена статусов)
+  pages/SupportPage.js    — страница поддержки
+  styles/global.css       — дизайн-система: цветовые токены CSS, компоненты (кнопки, карточки, таблицы, модалки)
+
+=== СХЕМА БД ===
+users(id SERIAL PK, name VARCHAR, email VARCHAR UNIQUE, password TEXT, role VARCHAR DEFAULT 'user', avatar TEXT, created_at TIMESTAMPTZ)
+tours(id SERIAL PK, title VARCHAR, description TEXT, location VARCHAR, country VARCHAR, category VARCHAR, price NUMERIC, duration INT, image_url TEXT, available BOOL DEFAULT true, created_at TIMESTAMPTZ)
+bookings(id SERIAL PK, user_id→users, tour_id→tours, start_date DATE, end_date DATE, guests INT, total_price NUMERIC, status VARCHAR DEFAULT 'pending', notes TEXT, created_at TIMESTAMPTZ)
+payments(id SERIAL PK, booking_id→bookings, user_id→users, amount NUMERIC, status VARCHAR, method VARCHAR, transaction_id VARCHAR, created_at TIMESTAMPTZ)
+browsing_history(id SERIAL PK, user_id→users, tour_id→tours, viewed_at TIMESTAMPTZ)
+
+Статусы бронирования: pending → confirmed / cancelled / completed
+Методы оплаты: card, cash, online
+Роли: user, agent, admin
+
+=== БЕЗОПАСНОСТЬ ===
+- Пароли: bcrypt, cost factor 10
+- Токены: JWT, expire 7d, передаются в Authorization: Bearer <token>
+- Middleware auth.js верифицирует токен на каждом защищённом маршруте
+- Middleware role.js блокирует доступ при недостаточной роли (403)
+
+=== API МАРШРУТЫ ===
+[публичные]
+  POST /api/auth/register — { name, email, password } → { token, user }
+  POST /api/auth/login    — { email, password } → { token, user }
+[auth required]
+  GET/PUT /api/auth/me
+  GET /api/tours          — ?search=&category=&country=&minPrice=&maxPrice=
+  GET /api/tours/:id
+  POST /api/bookings
+  GET /api/bookings/my
+  POST /api/payments
+  GET /api/payments
+  POST/GET /api/browsing
+[agent/admin]
+  GET /api/bookings
+  PUT /api/bookings/:id/status
+[admin only]
+  POST/PUT/DELETE /api/tours/:id
+  GET/PUT/DELETE /api/users
+
+=== ОСОБЕННОСТИ РЕАЛИЗАЦИИ ===
+1. 3D-глобус без WebGL: Canvas 2D scanline-проекция. Каждая строка пикселей рендерится с шириной cos(lat)×size — корректное сжатие полюсов. Текстура NASA (Land ocean ice cloud 2048px). Эффекты: limb darkening, pole darkening, атмосферное свечение, солнечный блик, спекулярный отблеск. ~170 drawImage-вызовов на кадр. requestAnimationFrame, 0.0004 рад/кадр.
+2. Автоинициализация БД: при старте server.js создаёт все таблицы (IF NOT EXISTS) и аккаунт администратора (admin@touragency.ru / Admin123!) если его нет.
+3. Исправление SASL-ошибки PostgreSQL: db.js парсит DATABASE_URL через URL API, передаёт password явно как String(), ssl: false для локального Postgres.
+4. Дизайн страницы авторизации: светло-голубой градиент (#C8E8F8→#87C8EE) имитирует дневное небо, SVG-облака с blur-фильтрами и анимацией дрейфа, солнечное свечение в углу.
+5. Дизайн-система CSS: кастомные свойства (--burg-*, --blue-*), готовые классы .btn, .card, .modal, .badge, .table, .alert, полная адаптивность.
+
+=== СТРУКТУРА ДИПЛОМНОЙ РАБОТЫ (напиши все разделы) ===
+
+ВВЕДЕНИЕ (~3 стр)
+- Актуальность автоматизации туристического бизнеса
+- Цель: разработать веб-приложение для полного цикла работы тур. агентства
+- Задачи: анализ требований, проектирование БД и API, реализация frontend/backend, тестирование
+- Практическая значимость
+
+ГЛАВА 1. АНАЛИЗ ПРЕДМЕТНОЙ ОБЛАСТИ (~12 стр)
+1.1. Обзор рынка туристических услуг и проблемы ручного учёта
+1.2. Сравнительный анализ существующих систем (Tourvisor, TravelLine, собственные разработки)
+1.3. Требования к системе (функциональные: каталог, бронирование, оплата, роли; нефункциональные: производительность, безопасность, адаптивность)
+1.4. Use-case диаграммы для каждой роли (user, agent, admin)
+1.5. Выбор технологий и обоснование (React vs Angular, Node.js vs Django, PostgreSQL vs MySQL)
+
+ГЛАВА 2. ПРОЕКТИРОВАНИЕ (~15 стр)
+2.1. Архитектура: SPA + REST API, разделение ответственности
+2.2. Проектирование БД: ER-диаграмма, нормализация (3NF), описание таблиц и связей
+2.3. Проектирование API: таблица маршрутов, форматы JSON, коды ответов
+2.4. Проектирование UI: структура страниц, навигация, UX-решения
+2.5. Система безопасности: JWT flow, bcrypt, ролевой доступ
+
+ГЛАВА 3. РЕАЛИЗАЦИЯ (~20 стр)
+3.1. Серверная часть: Express, middleware, маршруты, обработка ошибок
+3.2. Слой данных: node-postgres, пул соединений, SQL-запросы, автоинициализация
+3.3. Клиентская часть: компонентная архитектура React, контекст аутентификации
+3.4. 3D-глобус: алгоритм scanline-проекции, Canvas API, текстура, спецэффекты
+3.5. Дизайн-система и адаптивность
+
+ГЛАВА 4. ТЕСТИРОВАНИЕ (~8 стр)
+4.1. Тестирование API (curl/Postman): сценарии регистрации, входа, бронирования, оплаты
+4.2. Тестирование ролей: попытки доступа с недостаточными правами (ожидаемый 403)
+4.3. Тестирование UI: основные сценарии пользователя
+4.4. Анализ безопасности: SQL-инъекции, XSS, перехват токена
+4.5. Производительность: время ответа API, размер бандла фронтенда
+
+ЗАКЛЮЧЕНИЕ (~2 стр)
+- Достигнутые результаты
+- Перспективы: мобильное приложение, интеграция платёжных систем, геосервисы, email-уведомления
+
+СПИСОК ЛИТЕРАТУРЫ (30+ источников)
+- Официальная документация React, Node.js, Express, PostgreSQL, JWT
+- Книги: «Node.js в действии», «React. Полное руководство»
+- Научные статьи по веб-разработке и информационным системам
+- ГОСТ Р 34.10 (безопасность), ГОСТ Р 7.0.5-2008 (оформление библиографии)
+
+ПРИЛОЖЕНИЕ А — Листинги кода (server.js, db.js, auth.js, Globe3D.js ключевые части)
+ПРИЛОЖЕНИЕ Б — Скриншоты интерфейса
+ПРИЛОЖЕНИЕ В — Инструкция по развёртыванию
+```
+
+---
 
 ## Аннотация
 

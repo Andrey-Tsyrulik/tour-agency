@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../api';
 import Globe3D from '../components/Globe3D';
 
-/* ── Фоновые облака ──────────────────────────────────────── */
 const Clouds = () => (
   <svg viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg"
     style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }}>
@@ -13,7 +12,7 @@ const Clouds = () => (
       <filter id="blur2"><feGaussianBlur stdDeviation="4" /></filter>
       <filter id="blur3"><feGaussianBlur stdDeviation="10" /></filter>
     </defs>
-    <g fill="white" fillOpacity="0.28" filter="url(#blur3)">
+    <g fill="white" fillOpacity="0.55" filter="url(#blur3)">
       <ellipse cx="160"  cy="90"  rx="130" ry="48" />
       <ellipse cx="95"   cy="78"  rx="88"  ry="36" />
       <ellipse cx="230"  cy="74"  rx="96"  ry="40" />
@@ -29,7 +28,7 @@ const Clouds = () => (
       <ellipse cx="205"  cy="722" rx="115" ry="44" />
       <ellipse cx="1310" cy="752" rx="125" ry="46" />
     </g>
-    <g fill="white" fillOpacity="0.20" filter="url(#blur2)">
+    <g fill="white" fillOpacity="0.40" filter="url(#blur2)">
       <ellipse cx="162"  cy="88"  rx="108" ry="38" />
       <ellipse cx="98"   cy="76"  rx="68"  ry="28" />
       <ellipse cx="232"  cy="72"  rx="76"  ry="30" />
@@ -44,7 +43,7 @@ const Clouds = () => (
       <ellipse cx="82"   cy="402" rx="72"  ry="27" />
       <ellipse cx="1388" cy="502" rx="78"  ry="30" />
     </g>
-    <g fill="white" fillOpacity="0.42" filter="url(#blur1)">
+    <g fill="white" fillOpacity="0.70" filter="url(#blur1)">
       <ellipse cx="158"  cy="86"  rx="80"  ry="26" />
       <ellipse cx="92"   cy="74"  rx="52"  ry="18" />
       <ellipse cx="234"  cy="70"  rx="58"  ry="22" />
@@ -69,7 +68,7 @@ const Clouds = () => (
 
 const PlaneLogo = () => (
   <svg width="38" height="38" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="20" cy="20" r="20" fill="rgba(255,255,255,0.18)" />
+    <circle cx="20" cy="20" r="20" fill="rgba(255,255,255,0.22)" />
     <path d="M32 18.5V16L21 10.5V4.5C21 3.4 20.1 2.5 19 2.5C17.9 2.5 17 3.4 17 4.5V10.5L6 16V18.5L17 15V22.5L14.5 24V26L19 24.5L23.5 26V24L21 22.5V15L32 18.5Z"
       fill="#F4A7B5" />
   </svg>
@@ -118,7 +117,7 @@ const AuthPage = () => {
   const s = {
     page: {
       minHeight: '100vh',
-      background: 'linear-gradient(160deg, #071828 0%, #0C2D52 30%, #0E3D6E 60%, #0A2848 85%, #060F1E 100%)',
+      background: 'linear-gradient(160deg, #C8E8F8 0%, #A8D8F0 20%, #87C8EE 45%, #A0D4F5 70%, #BEE4FC 100%)',
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
       position: 'relative',
@@ -133,10 +132,10 @@ const AuthPage = () => {
       padding: '40px', zIndex: 2, position: 'relative',
     },
     card: {
-      background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)',
+      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)',
       borderRadius: 22, width: '100%', maxWidth: 420,
-      boxShadow: '0 20px 60px rgba(30,80,140,0.22), 0 4px 16px rgba(0,0,0,0.08)',
-      overflow: 'hidden', border: '1px solid rgba(255,255,255,0.7)',
+      boxShadow: '0 20px 60px rgba(30,80,140,0.18), 0 4px 16px rgba(0,0,0,0.07)',
+      overflow: 'hidden', border: '1px solid rgba(255,255,255,0.85)',
     },
     cardTop: {
       background: 'linear-gradient(135deg, #7D1128 0%, #9B1B30 100%)',
@@ -179,13 +178,13 @@ const AuthPage = () => {
     switchText: { textAlign: 'center', fontSize: 12.5, color: '#5A6A7E' },
     switchLink: { color: '#7D1128', cursor: 'pointer', fontWeight: 700, marginLeft: 4 },
     tagline: {
-      color: 'rgba(255,255,255,0.96)', fontSize: 15, textAlign: 'center',
+      color: 'rgba(10,40,80,0.88)', fontSize: 15, textAlign: 'center',
       marginTop: 28, lineHeight: 1.85, maxWidth: 310,
-      textShadow: '0 2px 8px rgba(20,60,120,0.4)',
-      fontWeight: 500,
+      textShadow: '0 1px 4px rgba(255,255,255,0.6)',
+      fontWeight: 600,
     },
     dots: { display: 'flex', gap: 8, marginTop: 22, justifyContent: 'center' },
-    dot: { height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.45)', transition: 'all 0.3s' },
+    dot: { height: 8, borderRadius: 4, background: 'rgba(20,80,160,0.35)', transition: 'all 0.3s' },
   };
 
   return (
@@ -208,6 +207,20 @@ const AuthPage = () => {
       `}</style>
 
       <div style={s.page} className="auth-grid">
+        {/* Sun glow top-right */}
+        <div style={{
+          position: 'absolute', top: -120, right: -100, width: 520, height: 520,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,240,180,0.55) 0%, rgba(255,220,100,0.25) 40%, transparent 70%)',
+          pointerEvents: 'none', zIndex: 1,
+        }} />
+        {/* Horizon haze at the bottom */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 200,
+          background: 'linear-gradient(to top, rgba(255,255,255,0.28) 0%, transparent 100%)',
+          pointerEvents: 'none', zIndex: 1,
+        }} />
+
         {/* Дрейфующие облака */}
         <div className="auth-cloud-drift"
           style={{ position:'absolute', inset:0, zIndex:1, pointerEvents:'none' }}>
@@ -227,7 +240,7 @@ const AuthPage = () => {
               <div key={i} style={{
                 ...s.dot,
                 width: i === 0 ? 24 : 8,
-                background: i === 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)',
+                background: i === 0 ? 'rgba(20,80,160,0.7)' : 'rgba(20,80,160,0.3)',
               }} />
             ))}
           </div>
