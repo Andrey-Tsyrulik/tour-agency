@@ -10,6 +10,7 @@ channel = "stable-25_05"
 
 [userenv.shared]
 PORT = "5000"
+JWT_SECRET = "841d6b6efe8772178f8cd64096963724e9277b629fcb33421453223e4760beba"
 
 [workflows]
 runButton = "Project"
@@ -27,13 +28,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "bash start.sh"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash /home/runner/workspace/start.sh"
+waitForPort = 5000
 
 [[ports]]
 localPort = 3001
@@ -41,7 +42,7 @@ externalPort = 80
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
+externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
